@@ -15,25 +15,32 @@ from sklearn.pipeline import Pipeline
 import customtransf
 
 def create_pipeline(df: pd.DataFrame):
+    num_attribs = list(df.select_dtypes(include=['int64', 'float64']).columns)
+    cat_attribs = list(df.select_dtypes(include=['object']).columns)
+
+    index_of_value = num_attribs.index("Value")
+    index_of_wage = num_attribs.index("Wage")
+
+    index_of_positions_played = cat_attribs.index("Positions Played")
+
     numreical_steps = [
         ('cleanup', SimpleImputer(missing_values=np.nan, strategy="mean")),
         ('custom', customtransf.CustomTransf("Value", "Wage")),
         ('scaler', StandardScaler())
     ]
-    category_steps = [
-        ('cleanup', SimpleImputer(strategy="most_frequent")),
-        ('encoding', customtransf.CustomMLBEncoding("Positions Played"))
-    ]
-
-    num_attribs = list(df.select_dtypes(include=['int64', 'float64']).columns)
-    cat_attribs = list(df.select_dtypes(include=['object']).columns)
-
-    full_pipeline = ColumnTransformer([
-        # ("num", numreical_steps, num_attribs),
-        ("cat", category_steps, cat_attribs),
+    category_steps_pip = Pipeline([
+        # ('cleanup', SimpleImputer(strategy="most_frequent")),
+        ('encoding', customtransf.CustomMLBEncoding(index_of_positions_played))
     ])
-
+    df_transformed = category_steps_pip.fit_transform(df)
+    """
+    full_pipeline = ColumnTransformer([
+        ("num", Pipeline(numreical_steps), num_attribs),
+        ("cat", category_steps_pip, cat_attribs),
+    ])
     df_transformed = full_pipeline.fit_transform(df)
+    """
+
     return df_transformed
 
 def main():
@@ -52,8 +59,8 @@ def main():
     # df_new = one_hot_encoding(df, "Positions Played")
     # val_per_wage_t = customtransf.CustomTransf("Value", "Wage")
     # df_new = val_per_wage_t.fit_transform(df_new)
-    train_set_clean = train_set.drop("Value", axis = 1) # We dropped the Value as it will be our Y that we need to predict
-    transformed_train_set = create_pipeline(train_set_clean)
+    y_train = train_set["Value"]
+    transformed_train_set = create_pipeline(train_set)
     unload(transformed_train_set, new_filepath)
 
 
