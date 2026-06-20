@@ -19,20 +19,23 @@ class CustomTransf(BaseEstimator, TransformerMixin):
 
 
 class CustomMLBEncoding(BaseEstimator, TransformerMixin):
-    def __init__(self, column_index):
-        self.column_index = column_index
+    def __init__(self):
         self.classes = None
 
     def fit(self, X, y=None):
         return self
 
-    def transform(self, X):
+    def get_feature_names_out(self, input_features=None):
+        return np.asarray(self.classes)
+
+    def transform(self, X: np.ndarray):
         # Copy nd array
         X = X.copy()
         # Create multilabel binarizer
         mlb = MultiLabelBinarizer()
         # Get data from the target column i.e "RW,ST,CB"
-        target_column = X[:, self.column_index]
+        # index of column will always be 0 as we will pass only 1 column in our transformer
+        target_column = X[:, 0]
         """
         Now for fit_transform we need 2d array [[], [], ...] like this
         so we iterate over each row and split with , and then append each array as a row in 2d array
@@ -40,13 +43,8 @@ class CustomMLBEncoding(BaseEstimator, TransformerMixin):
         """
         split_columns = [row.split(',') for row in target_column]
         new_multiple_columns = mlb.fit_transform(split_columns)
-        # We want the column passed to be removed from our dataset
-        X = np.delete(X, self.column_index, axis=1)
-        # Store the classes generated from the mlb as it will be used as new columns in the data when create df
         self.classes = mlb.classes_
-        # Concat the new data generated after transformation in the exiting data and return
-        X = np.concatenate((X, new_multiple_columns), axis=1)
-        return X
+        return new_multiple_columns
         """
         Below code is used if you are getting dataframe in X rather than np.ndarray
             values_df = pd.DataFrame(
