@@ -25,6 +25,7 @@ class CustomMLBEncoding(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         return self
 
+    # In order to support the functionality of the get_feature_names_out in the processor
     def get_feature_names_out(self, input_features=None):
         return np.asarray(self.classes)
 
@@ -45,11 +46,3 @@ class CustomMLBEncoding(BaseEstimator, TransformerMixin):
         new_multiple_columns = mlb.fit_transform(split_columns)
         self.classes = mlb.classes_
         return new_multiple_columns
-        """
-        Below code is used if you are getting dataframe in X rather than np.ndarray
-            values_df = pd.DataFrame(
-                mlb.fit_transform(split_columns), columns=mlb.classes_, index=X.index
-            )
-            X.drop(columns=[self.column], inplace=True)
-            X = pd.concat([X, values_df], axis=1)
-        """

@@ -17,4 +17,6 @@ def split(df: pd.DataFrame):
     for train_loc, test_loc in sfSplit.split(df, df["overall_cat"]):
         train_set = df.iloc[train_loc]
         test_set = df.iloc[test_loc]
+    for set_ in (train_set, test_set):
+        set_.drop("overall_cat", axis=1, inplace=True)
     return train_set, test_set
