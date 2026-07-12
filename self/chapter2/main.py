@@ -50,7 +50,7 @@ def main():
     X_test_transformed = pd.DataFrame(df_transf_test_arr, columns=FEATURES_TO_KEEP, index=X_test.index)
     
     # lin_train(X_train_transformed, y_train, X_test_transformed, y_test)
-    # tree_train(X_train_transformed, y_train, X_test_transformed, y_test)
+    # tree_train(X_train_transformed, y_train, X_test_transforme , y_test)
     random_forrest_train_gridcv(X_train_transformed, y_train, X_test_transformed, y_test)
 
     # lin_train(X_train_transformed, y_train, X_train_transformed, y_train)
